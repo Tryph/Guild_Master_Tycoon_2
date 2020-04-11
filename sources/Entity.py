@@ -1,13 +1,22 @@
 from __future__ import annotations
 
+from typing import Optional, List
+
+from sources.Equipments.Equipments import Equipments
+
 
 class Entity:
     name: str
+    class_: str
+    strength: int
+    equipments: Equipments
 
-    def __init__(self, name, class_, strength):
+    def __init__(self, name, class_, strength,
+                 equipments: Optional[Equipments] = None):
         self.name = name
         self.class_ = class_
-        self.strength = strength
+        self._strength = strength
+        self.equipments = equipments
 
     def __sub__(self, other: Entity):
         """
@@ -18,3 +27,7 @@ class Entity:
 
     def fight(self, other: Entity):
         return self - other
+
+    @property
+    def strength(self):
+        return self._strength + self.equipments.strength
