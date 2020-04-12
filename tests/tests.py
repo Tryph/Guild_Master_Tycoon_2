@@ -1,60 +1,158 @@
+import random
+
+from pytest import fixture
+
 from sources.Creatures.WaterElem import WaterElem
-from sources.Entity import Entity
-from sources.Classes.Hunter import Hunter
-from sources.Classes.Mage import Mage
-from sources.Classes.Warrior import Warrior
-from sources.Equipments.Armor import Armor
-from sources.Equipments.Equipments import Equipments
-from sources.Equipments.Weapon import Weapon
+from sources.Entity import Entity, Mage, Hunter, Warrior
+from sources.Equipments.Equipments import Equipments, Armor, Weapon
+from sources.Characts.Characts import Strength, Intelligence, Dexterity, \
+    Characts, HitPoint
 
 
-def test_class_creation():
-    char = Entity('Blob', 'Random', 2)
+@fixture
+def strength():
+    return Strength(5)
+
+
+@fixture
+def intelligence():
+    return Intelligence(10)
+
+
+@fixture
+def dexterity():
+    return Dexterity(20)
+
+
+@fixture
+def hit_point():
+    return HitPoint(50)
+
+
+@fixture
+def characts(strength, intelligence, dexterity, hit_point):
+    return Characts(strength, intelligence, dexterity, hit_point)
+
+
+@fixture
+def mage():
+    return Mage('Merlin')
+
+
+@fixture
+def hunter():
+    return Hunter('Gon')
+
+
+@fixture
+def warrior():
+    return Warrior('Conan')
+
+
+@fixture
+def water_elem():
+    return WaterElem()
+
+
+@fixture
+def weapon(characts):
+    return Weapon('Starforge', characts)
+
+
+@fixture
+def armor(characts):
+    return Armor('Headhunter', characts)
+
+
+@fixture
+def equipments(weapon, armor):
+    return Equipments(weapon, armor)
+
+
+def test_class_creation(characts):
+    char = Entity('Blob', 'Random', characts)
+    assert char.name == 'Blob'
+    assert char.class_ == 'Random'
+
     mage = Mage('Merlin')
+    assert mage.name == 'Merlin'
+    assert mage.class_ == 'Mage'
+
     hunter = Hunter('Gon')
+    assert hunter.name == 'Gon'
+    assert hunter.class_ == 'Hunter'
+
     warrior = Warrior('Conan')
+    assert warrior.name == 'Conan'
+    assert warrior.class_ == 'Warrior'
+
     water_elem = WaterElem()
-    assert char.name, char.class_ == ('Blob', 'Random')
-    assert mage.name, mage.class_ == ('Merlin', 'Mage')
-    assert hunter.name, hunter.class_ == ('Gon', 'Hunter')
-    assert warrior.name, warrior.class_ == ('Conan', 'Warrior')
-    assert water_elem.name, water_elem.class_ == ('Water Elemental', 'Mage')
+    assert water_elem.name == 'Water Elemental'
+    assert water_elem.class_ == 'Mage'
 
 
-def test_fight_between_entities():
-    merlin = Mage('Merlin')
-    gon = Hunter('Gon')
-    conan = Warrior('Conan')
-    water_elem = WaterElem()
-
-    assert not merlin - water_elem
-    assert not merlin.fight(water_elem)
-    assert gon - water_elem
-    assert gon.fight(water_elem)
-    assert conan - water_elem
-    assert conan.fight(water_elem)
+def test_fight_between_entities(mage, hunter, warrior, water_elem):
+    random.seed(0)
+    assert mage - water_elem
+    assert mage.fight(water_elem)
+    assert hunter - water_elem
+    assert hunter.fight(water_elem)
+    assert warrior - water_elem
+    assert warrior.fight(water_elem)
 
 
-def test_weapon_creation():
-    headhunter = Armor('Headhunter', 10)
-    starforge = Weapon('Starforge', 3)
+def test_stats():
+    strength = Strength(5)
+    assert strength == 5
+    assert type(strength()) is int
 
-    assert (headhunter.name, headhunter.strength, headhunter.type_ == (
-        'Headhunter',
-        10,
-        'Armor'
-    ))
-    assert (starforge.name, starforge.strength, starforge.type_ == (
-        'Starforge',
-        3,
-        'Weapon'
-    ))
+    intelligence = Intelligence(10)
+    assert intelligence == 10
+    assert type(intelligence()) is int
+
+    dexterity = Dexterity(20)
+    assert dexterity == 20
+    assert type(dexterity()) is int
+
+    hit_point = HitPoint(50)
+    assert hit_point == 50
+    assert type(hit_point()) is int
+
+    statistics = Characts(strength, intelligence, dexterity, hit_point)
+    assert statistics.strength == 5
+    assert statistics.intelligence == 10
+    assert statistics.dexterity == 20
+    assert statistics.hit_point == 50
+
+    statistics = Characts(10, 5, 2, 42)
+    assert statistics.strength == 10
+    assert statistics.intelligence == 5
+    assert statistics.dexterity == 2
+    assert statistics.hit_point == 42
+    assert statistics() == (10, 5, 2, 42)
 
 
-def test_char_with_equipments():
-    headhunter = Armor('Headhunter', 10)
-    starforge = Weapon('Starforge', 3)
-    char = Entity('Blob', 'Random', 2, Equipments(starforge, headhunter))
+def test_equipment_with_stat(characts):
+    headhunter = Armor('Headhunter', characts)
+    assert headhunter.type_ == 'Armor'
+    assert headhunter.name == 'Headhunter'
+    assert headhunter.characts() == (5, 10, 20, 50)
+
+
+def test_equipment_creation(characts):
+    headhunter = Armor('Headhunter', characts)
+    assert headhunter.name == 'Headhunter'
+    assert headhunter.characts() == (5, 10, 20, 50)
+    assert headhunter.type_ == 'Armor'
+
+    starforge = Weapon('Starforge', characts)
+    assert starforge.name == 'Starforge'
+    assert starforge.characts() == (5, 10, 20, 50)
+    assert starforge.type_ == 'Weapon'
+
+
+def test_char_with_equipments(weapon, armor, characts, equipments):
+    char = Entity('Blob', 'Random', characts, equipments)
 
     assert char.equipments.weapon.name == 'Starforge'
     assert char.equipments.armor.name == 'Headhunter'
@@ -62,12 +160,12 @@ def test_char_with_equipments():
     mage = Mage('Merlin')
     assert mage.equipments.weapon.name == 'Staff'
     assert mage.equipments.armor.name == 'Wizard dress'
-    assert mage.strength == 3
+    assert mage.strength == 1
 
     hunter = Hunter('Gon')
     assert hunter.equipments.weapon.name == 'Bow'
     assert hunter.equipments.armor.name == 'Leather armor'
-    assert hunter.strength == 16
+    assert hunter.strength == 11
 
     warrior = Warrior('Conan')
     assert warrior.equipments.weapon.name == 'Sword'
@@ -75,4 +173,8 @@ def test_char_with_equipments():
     assert warrior.strength == 27
 
 
-
+def test_fight_sim(warrior, water_elem):
+    result = warrior - water_elem
+    assert result.win
+    assert result.time == 2
+    assert result.overkill == 17
