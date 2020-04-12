@@ -1,4 +1,4 @@
-from sources.Classes.Mage import Mage
+from sources.Entity import Mage
 
 
 class WaterElem(Mage):
