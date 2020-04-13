@@ -40,8 +40,10 @@ def attack_speed():
 
 
 @fixture
-def characts(strength, intelligence, dexterity, hit_point, wounds):
-    return Characts(strength, intelligence, dexterity, hit_point, wounds)
+def characts(strength, intelligence, dexterity, hit_point, wounds,
+             attack_speed):
+    return Characts(strength, intelligence, dexterity, hit_point, wounds,
+                    attack_speed)
 
 
 @fixture
@@ -103,12 +105,9 @@ def test_class_creation(characts):
 
 def test_fight_between_entities(mage, hunter, warrior, water_elem):
     random.seed(0)
-    assert mage - water_elem
-    assert mage.fight(water_elem)
+    assert not mage - water_elem
     assert hunter - water_elem
-    assert hunter.fight(water_elem)
     assert warrior - water_elem
-    assert warrior.fight(water_elem)
 
 
 def test_stats():
@@ -149,30 +148,31 @@ def test_stats():
     assert statistics.hit_point == 42
     assert statistics() == (10, 5, 2, 42)
 
-    statistics = Characts(wounds=wounds)
+    statistics = Characts(wounds=wounds, attack_speed=attack_speed)
     assert statistics.strength == 0
     assert statistics.intelligence == 0
     assert statistics.dexterity == 0
     assert statistics.hit_point == 0
     assert statistics.wounds == 3
+    assert statistics.wounds == 3.
 
 
 def test_equipment_with_stat(characts):
     headhunter = Armor('Headhunter', characts)
     assert headhunter.type_ == 'Armor'
     assert headhunter.name == 'Headhunter'
-    assert headhunter.characts() == (5, 10, 20, 50, 3)
+    assert headhunter.characts() == (5, 10, 20, 50, 3, 1.)
 
 
 def test_equipment_creation(characts):
     headhunter = Armor('Headhunter', characts)
     assert headhunter.name == 'Headhunter'
-    assert headhunter.characts() == (5, 10, 20, 50, 3)
+    assert headhunter.characts() == (5, 10, 20, 50, 3, 1.)
     assert headhunter.type_ == 'Armor'
 
     starforge = Weapon('Starforge', characts)
     assert starforge.name == 'Starforge'
-    assert starforge.characts() == (5, 10, 20, 50, 3)
+    assert starforge.characts() == (5, 10, 20, 50, 3, 1.)
     assert starforge.type_ == 'Weapon'
 
 
@@ -196,10 +196,13 @@ def test_char_with_equipments(weapon, armor, characts, equipments):
     assert warrior.equipments.weapon.name == 'Sword'
     assert warrior.equipments.armor.name == 'Full plate armor'
     assert warrior.strength == 27
+    assert warrior.attack_speed == 1.
 
 
 def test_fight_sim(warrior, water_elem):
+    water_elem._statistics = Characts(strength=10, hit_point=100,
+                                      attack_speed=0.8)
+    warrior._statistics = Characts(strength=10, hit_point=50, attack_speed=2)
     result = warrior - water_elem
-    assert result.win
-    assert result.time == 2
-    assert result.overkill == 17
+    print(result)
+    assert result
