@@ -55,6 +55,10 @@ class Entity:
         return self._statistics.wounds + self.equipments.wounds
 
     @property
+    def attack_speed(self) -> int:
+        return self._statistics.attack_speed + self.equipments.attack_speed
+
+    @property
     def HP_to_death(self) -> int:
         return self.hit_point - self.wounds
 

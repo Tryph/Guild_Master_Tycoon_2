@@ -4,7 +4,7 @@ from typing import Optional, Union, Type, TypeVar
 
 
 class Charact:
-    value: int
+    value: Union[int, float]
     name: str
     short: str
 
@@ -65,21 +65,29 @@ class Wounds(Charact):
         super().__init__('Wounds', 'W', value)
 
 
+class AttackSpeed(Charact):
+    def __init__(self, value: Optional[int, float] = None):
+        super().__init__('Attack Speed', 'AS', value)
+
+
 Stat_ = TypeVar('Stat_', bound=Charact)
 
 
-def _set_stat(value: Union[Charact, int, None], type_: Type[Stat_]) -> Stat_:
+def _set_stat(value: Union[Charact, int, float, None],
+              stat_type: Type[Stat_],
+              rational_type: Type[int, float] = int) -> Stat_:
     """
     :param value: the value of the Stat instance we want to create.
-    :param type_: the subclass of Stat we want to instantiate.
+    :param rational_type: the subclass of Rational we want to use.
+    :param stat_type: the subclass of Stat we want to instantiate.
     :return: an instance of the subclass passed in type_.
     """
-    if isinstance(value, int):
-        return type_(value)
-    elif isinstance(value, type_):
+    if isinstance(value, rational_type):
+        return stat_type(value)
+    elif isinstance(value, stat_type):
         return value
     elif value is None:
-        return type_()
+        return stat_type()
 
 
 class Characts:
@@ -88,6 +96,7 @@ class Characts:
     dexterity: Dexterity
     hit_point: HitPoint
     wounds: Wounds
+    attack_speed: AttackSpeed
 
     def __init__(
             self,
@@ -96,14 +105,27 @@ class Characts:
             dexterity: Optional[Dexterity, int] = None,
             hit_point: Optional[HitPoint, int] = None,
             wounds: Optional[Wounds, int] = None,
+            attack_speed: Optional[AttackSpeed, int] = None,
     ):
         self.strength = _set_stat(strength, Strength)
         self.intelligence = _set_stat(intelligence, Intelligence)
         self.dexterity = _set_stat(dexterity, Dexterity)
         self.hit_point = _set_stat(hit_point, HitPoint)
         self.wounds = _set_stat(wounds, Wounds)
+        self.attack_speed = _set_stat(attack_speed, AttackSpeed, float)
 
     def __str__(self):
+        result = f'characts: {self.stat_list}'
+        return result
+
+    def __call__(self, *args, **kwargs):
+        """
+        :return: return data with primitive type.
+        """
+        return (self.stat_list)
+
+    @property
+    def stat_list(self):
         characts = list()
         if self.strength:
             characts.append(self.strength)
@@ -115,12 +137,6 @@ class Characts:
             characts.append(self.hit_point)
         if self.wounds:
             characts.append(self.wounds)
-        result = f'characts: {tuple(characts)}'
-        return result
-
-    def __call__(self, *args, **kwargs):
-        """
-        :return: return data with primitive type.
-        """
-        return (self.strength(), self.intelligence(), self.dexterity(),
-                self.hit_point)
+        if self.attack_speed:
+            characts.append(self.attack_speed)
+        return tuple(characts)

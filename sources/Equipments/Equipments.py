@@ -69,3 +69,8 @@ class Equipments:
     @property
     def wounds(self):
         return self.weapon.characts.wounds + self.armor.characts.wounds
+
+    @property
+    def attack_speed(self):
+        return self.weapon.characts.attack_speed \
+               + self.armor.characts.attack_speed
