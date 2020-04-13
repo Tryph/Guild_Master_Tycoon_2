@@ -6,7 +6,7 @@ from sources.Creatures.WaterElem import WaterElem
 from sources.Entity import Entity, Mage, Hunter, Warrior
 from sources.Equipments.Equipments import Equipments, Armor, Weapon
 from sources.Characts.Characts import Strength, Intelligence, Dexterity, \
-    Characts, HitPoint
+    Characts, HitPoint, Wounds, AttackSpeed
 
 
 @fixture
@@ -30,8 +30,18 @@ def hit_point():
 
 
 @fixture
-def characts(strength, intelligence, dexterity, hit_point):
-    return Characts(strength, intelligence, dexterity, hit_point)
+def wounds():
+    return Wounds(3)
+
+
+@fixture
+def attack_speed():
+    return AttackSpeed(1.)
+
+
+@fixture
+def characts(strength, intelligence, dexterity, hit_point, wounds):
+    return Characts(strength, intelligence, dexterity, hit_point, wounds)
 
 
 @fixture
@@ -118,6 +128,14 @@ def test_stats():
     assert hit_point == 50
     assert type(hit_point()) is int
 
+    wounds = Wounds(3)
+    assert wounds == 3
+    assert type(wounds()) is int
+
+    attack_speed = AttackSpeed(3.)
+    assert attack_speed == 3.
+    assert type(attack_speed()) is float
+
     statistics = Characts(strength, intelligence, dexterity, hit_point)
     assert statistics.strength == 5
     assert statistics.intelligence == 10
@@ -131,23 +149,30 @@ def test_stats():
     assert statistics.hit_point == 42
     assert statistics() == (10, 5, 2, 42)
 
+    statistics = Characts(wounds=wounds)
+    assert statistics.strength == 0
+    assert statistics.intelligence == 0
+    assert statistics.dexterity == 0
+    assert statistics.hit_point == 0
+    assert statistics.wounds == 3
+
 
 def test_equipment_with_stat(characts):
     headhunter = Armor('Headhunter', characts)
     assert headhunter.type_ == 'Armor'
     assert headhunter.name == 'Headhunter'
-    assert headhunter.characts() == (5, 10, 20, 50)
+    assert headhunter.characts() == (5, 10, 20, 50, 3)
 
 
 def test_equipment_creation(characts):
     headhunter = Armor('Headhunter', characts)
     assert headhunter.name == 'Headhunter'
-    assert headhunter.characts() == (5, 10, 20, 50)
+    assert headhunter.characts() == (5, 10, 20, 50, 3)
     assert headhunter.type_ == 'Armor'
 
     starforge = Weapon('Starforge', characts)
     assert starforge.name == 'Starforge'
-    assert starforge.characts() == (5, 10, 20, 50)
+    assert starforge.characts() == (5, 10, 20, 50, 3)
     assert starforge.type_ == 'Weapon'
 
 
