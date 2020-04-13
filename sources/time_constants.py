@@ -1,0 +1,1 @@
+ATTACK_BASE = 0.1

@@ -18,7 +18,7 @@ class Charact:
             return self.value == other.value
         return self.value == other
 
-    def __add__(self, other) -> int:
+    def __add__(self, other: Union[Charact, float, int]) -> Union[float, int]:
         if isinstance(other, type(self)):
             return self.value + other.value
         return self.value + other
@@ -30,7 +30,7 @@ class Charact:
     def __repr__(self) -> str:
         return self.__str__()
 
-    def __call__(self, *args, **kwargs) -> int:
+    def __call__(self, *args, **kwargs) -> Union[float, int]:
         """
         :return: return data with primitive type.
         """
@@ -66,16 +66,16 @@ class Wounds(Charact):
 
 
 class AttackSpeed(Charact):
-    def __init__(self, value: Optional[int, float] = None):
+    def __init__(self, value: Union[float, int] = 0.):
         super().__init__('Attack Speed', 'AS', value)
 
 
 Stat_ = TypeVar('Stat_', bound=Charact)
 
 
-def _set_stat(value: Union[Charact, int, float, None],
+def _set_stat(value: Union[Charact, float, int, None],
               stat_type: Type[Stat_],
-              rational_type: Type[int, float] = int) -> Stat_:
+              rational_type: Type[float, int] = int) -> Stat_:
     """
     :param value: the value of the Stat instance we want to create.
     :param rational_type: the subclass of Rational we want to use.
@@ -105,14 +105,15 @@ class Characts:
             dexterity: Optional[Dexterity, int] = None,
             hit_point: Optional[HitPoint, int] = None,
             wounds: Optional[Wounds, int] = None,
-            attack_speed: Optional[AttackSpeed, int] = None,
+            attack_speed: Union[AttackSpeed, int, float] = 0,
     ):
         self.strength = _set_stat(strength, Strength)
         self.intelligence = _set_stat(intelligence, Intelligence)
         self.dexterity = _set_stat(dexterity, Dexterity)
         self.hit_point = _set_stat(hit_point, HitPoint)
         self.wounds = _set_stat(wounds, Wounds)
-        self.attack_speed = _set_stat(attack_speed, AttackSpeed, float)
+        self.attack_speed = attack_speed if \
+            isinstance(attack_speed, AttackSpeed) else AttackSpeed(attack_speed)
 
     def __str__(self):
         result = f'characts: {self.stat_list}'
